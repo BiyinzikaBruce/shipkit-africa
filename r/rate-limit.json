@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "rate-limit",
+  "title": "Rate limit",
+  "description": "Upstash rate-limit presets for login, OTP, password reset, payments and APIs.",
+  "dependencies": [
+    "server-only",
+    "@upstash/ratelimit",
+    "@upstash/redis"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/shipkit/rate-limit.ts",
+      "content": "/**\n * ShipKit · rate-limit\n * Protect login, OTP, password reset and payment endpoints with Upstash Redis.\n *\n * Env vars: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN\n *\n *   const { success } = await limit(\"login\", ip);              // 5 per minute\n *   if (!success) return Response.json({ error: \"Too many attempts\" }, { status: 429 });\n */\nimport \"server-only\";\nimport { Ratelimit } from \"@upstash/ratelimit\";\nimport { Redis } from \"@upstash/redis\";\n\nconst redis = Redis.fromEnv();\n\n/** Presets. Tune per project. */\nexport const limiters = {\n  login: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, \"1 m\"), prefix: \"rl:login\" }),\n  otp: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, \"5 m\"), prefix: \"rl:otp\" }),\n  passwordReset: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, \"15 m\"), prefix: \"rl:reset\" }),\n  payment: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, \"1 m\"), prefix: \"rl:pay\" }),\n  api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, \"1 m\"), prefix: \"rl:api\" }),\n} as const;\n\nexport type LimiterName = keyof typeof limiters;\n\n/** Rate-limit by a key (user id, phone, or IP). */\nexport async function limit(name: LimiterName, key: string) {\n  return limiters[name].limit(key);\n}\n\n/** Best-effort client IP from proxy headers. */\nexport function clientIp(headers: Headers): string {\n  return headers.get(\"x-forwarded-for\")?.split(\",\")[0]?.trim() || headers.get(\"x-real-ip\") || \"unknown\";\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/rate-limit.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

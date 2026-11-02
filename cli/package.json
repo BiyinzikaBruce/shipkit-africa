@@ -1,0 +1,33 @@
+{
+  "name": "shipkit-africa",
+  "version": "0.1.0",
+  "description": "ShipKit: a framework that makes AI coding agents build production Next.js apps for African businesses. Roles, branches, mobile money, SMS, offline.",
+  "type": "module",
+  "bin": {
+    "shipkit-africa": "bin/shipkit.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "framework",
+    "README.md"
+  ],
+  "scripts": {
+    "bundle": "node scripts/bundle.mjs",
+    "prepack": "node scripts/bundle.mjs",
+    "test": "node scripts/bundle.mjs && node --test \"test/*.test.mjs\""
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": ["nextjs", "claude-code", "cursor", "ai-agent", "framework", "africa", "mobile-money", "mtn-momo", "prisma", "better-auth", "shadcn"],
+  "author": "Biyinzika Bruce (https://github.com/BiyinzikaBruce)",
+  "license": "MIT",
+  "homepage": "https://biyinzikabruce.github.io/shipkit-africa/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BiyinzikaBruce/shipkit-africa.git",
+    "directory": "cli"
+  },
+  "bugs": "https://github.com/BiyinzikaBruce/shipkit-africa/issues"
+}

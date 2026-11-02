@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "audit-log",
+  "title": "Audit log",
+  "description": "Write who-did-what audit entries with before/after snapshots, secrets redacted. Includes the Prisma model.",
+  "dependencies": [
+    "server-only"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/shipkit/audit-log.ts",
+      "content": "/**\n * ShipKit · audit-log\n * Record who did what to which record, and what changed. Use it for money,\n * stock, prices, roles and anything a business owner might ask about later.\n *\n * Add this model to prisma/schema.prisma:\n *\n *   model AuditLog {\n *     id             String   @id @default(cuid())\n *     organisationId String\n *     userId         String\n *     action         String          // \"sale.void\", \"price.update\", \"user.role.change\"\n *     entity         String          // \"Sale\"\n *     entityId       String\n *     before         Json?\n *     after          Json?\n *     reason         String?\n *     createdAt      DateTime @default(now())\n *     @@index([organisationId, createdAt])\n *     @@index([entity, entityId])\n *   }\n *\n * Usage (inside the same transaction as the change):\n *   await prisma.$transaction(async (tx) => {\n *     const after = await tx.sale.update({ ... });\n *     await writeAudit(tx, session, { action: \"sale.void\", entity: \"Sale\", entityId: after.id, before, after, reason });\n *   });\n */\nimport \"server-only\";\n\nexport interface AuditSession {\n  user: { id: string; organisationId?: string | null };\n}\n\nexport interface AuditEntry {\n  action: string;\n  entity: string;\n  entityId: string;\n  before?: unknown;\n  after?: unknown;\n  reason?: string;\n}\n\n/** Minimal shape of a Prisma client or transaction with the AuditLog model. */\nexport interface AuditClient {\n  auditLog: { create(args: { data: Record<string, unknown> }): Promise<unknown> };\n}\n\nconst SECRET_KEYS = /password|secret|token|apikey|api_key|pin/i;\n\n/** JSON-safe copy with secrets removed and Decimals/Dates turned into strings. */\nexport function sanitiseForAudit(value: unknown): unknown {\n  if (value === null || value === undefined) return value ?? null;\n  if (value instanceof Date) return value.toISOString();\n  if (Array.isArray(value)) return value.map(sanitiseForAudit);\n  if (typeof value === \"object\") {\n    const maybeDecimal = value as { toFixed?: unknown; constructor?: { name?: string } };\n    if (typeof maybeDecimal.toFixed === \"function\" && maybeDecimal.constructor?.name === \"Decimal\") return String(value);\n    const out: Record<string, unknown> = {};\n    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {\n      out[k] = SECRET_KEYS.test(k) ? \"[redacted]\" : sanitiseForAudit(v);\n    }\n    return out;\n  }\n  if (typeof value === \"bigint\") return value.toString();\n  return value;\n}\n\nexport async function writeAudit(db: AuditClient, session: AuditSession, entry: AuditEntry) {\n  const organisationId = session.user.organisationId;\n  if (!organisationId) throw new Error(\"Cannot audit without an organisation\");\n  return db.auditLog.create({\n    data: {\n      organisationId,\n      userId: session.user.id,\n      action: entry.action,\n      entity: entry.entity,\n      entityId: entry.entityId,\n      before: entry.before === undefined ? undefined : sanitiseForAudit(entry.before),\n      after: entry.after === undefined ? undefined : sanitiseForAudit(entry.after),\n      reason: entry.reason,\n    },\n  });\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/audit-log.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

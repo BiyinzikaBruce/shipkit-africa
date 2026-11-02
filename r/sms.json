@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sms",
+  "title": "SMS (Africa's Talking)",
+  "description": "Send SMS through Africa's Talking's REST API with phone normalisation and a segment-length helper.",
+  "dependencies": [
+    "server-only"
+  ],
+  "registryDependencies": [
+    "https://biyinzikabruce.github.io/shipkit-africa/r/phone.json"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/shipkit/sms.ts",
+      "content": "/**\n * ShipKit · sms\n * Send SMS through Africa's Talking's REST API without extra packages. Server-only.\n * Confirm the current API at https://developers.africastalking.com/docs/sms/overview\n *\n * Env vars:\n *   AT_USERNAME   \"sandbox\" while testing, your app username in production\n *   AT_API_KEY    API key for that username\n *   AT_SENDER_ID  optional approved sender id / short code\n *\n *   await sendSms([\"0772123456\"], \"TPA Shop: Paid UGX 25,000 by MoMo. Ref 7F3K.\");\n */\nimport \"server-only\";\nimport { toE164, type CountryCode } from \"@/lib/shipkit/phone\";\n\nexport interface SmsRecipientResult {\n  number: string;\n  status: string;\n  statusCode?: number;\n  messageId?: string;\n  cost?: string;\n}\n\n/**\n * Approximate characters per single SMS: 160 for plain text, 70 if the message\n * contains emoji or other non-GSM characters (which switch to unicode encoding).\n * Plain ASCII is treated as GSM; a few ASCII symbols (e.g. [ ] { } ~) actually\n * count double, so keep a margin.\n */\nexport function smsSegmentLimit(message: string): number {\n  return /^[\\n\\r\\x20-\\x7E]*$/.test(message) ? 160 : 70;\n}\n\nexport async function sendSms(\n  to: string[],\n  message: string,\n  opts: { country?: CountryCode; from?: string } = {},\n): Promise<SmsRecipientResult[]> {\n  const username = process.env.AT_USERNAME;\n  const apiKey = process.env.AT_API_KEY;\n  if (!username || !apiKey) throw new Error(\"Missing AT_USERNAME or AT_API_KEY\");\n  if (!message.trim()) throw new Error(\"Empty SMS message\");\n\n  const host = username === \"sandbox\" ? \"https://api.sandbox.africastalking.com\" : \"https://api.africastalking.com\";\n  const body = new URLSearchParams({\n    username,\n    to: to.map((n) => toE164(n, opts.country)).join(\",\"),\n    message,\n  });\n  const from = opts.from ?? process.env.AT_SENDER_ID;\n  if (from) body.set(\"from\", from);\n\n  const res = await fetch(`${host}/version1/messaging`, {\n    method: \"POST\",\n    headers: { apiKey, Accept: \"application/json\", \"Content-Type\": \"application/x-www-form-urlencoded\" },\n    body,\n    cache: \"no-store\",\n  });\n  if (!res.ok) throw new Error(`Africa's Talking error ${res.status}: ${await res.text()}`);\n  const data = (await res.json()) as { SMSMessageData?: { Recipients?: SmsRecipientResult[] } };\n  return data.SMSMessageData?.Recipients ?? [];\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/sms.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

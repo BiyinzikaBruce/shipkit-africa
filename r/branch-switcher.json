@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "branch-switcher",
+  "title": "Branch switcher",
+  "description": "Switch the branch a page shows via ?branch=, with an optional All branches item.",
+  "registryDependencies": [
+    "select"
+  ],
+  "files": [
+    {
+      "path": "registry/components/shipkit/branch-switcher.tsx",
+      "content": "\"use client\";\n/**\n * ShipKit · branch-switcher\n * Lets owners and managers switch the branch a page shows, via a `?branch=` search param.\n * The SERVER decides which branches the user may see: pass only those in `branches`,\n * and re-check the param server-side before using it.\n *\n *   <BranchSwitcher branches={[{ id: \"b1\", name: \"Kampala Road\" }]} allowAll />\n */\nimport { usePathname, useRouter, useSearchParams } from \"next/navigation\";\nimport { useTransition } from \"react\";\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from \"@/components/ui/select\";\n\nexport const ALL_BRANCHES = \"all\";\n\nexport function BranchSwitcher({\n  branches,\n  allowAll = false,\n  param = \"branch\",\n}: {\n  branches: { id: string; name: string }[];\n  allowAll?: boolean;\n  param?: string;\n}) {\n  const router = useRouter();\n  const pathname = usePathname();\n  const searchParams = useSearchParams();\n  const [isPending, startTransition] = useTransition();\n  const current = searchParams.get(param) ?? (allowAll ? ALL_BRANCHES : branches[0]?.id ?? \"\");\n\n  function onChange(value: string) {\n    const next = new URLSearchParams(searchParams.toString());\n    if (value === ALL_BRANCHES) next.delete(param);\n    else next.set(param, value);\n    next.delete(\"page\");\n    startTransition(() => router.push(`${pathname}?${next.toString()}`));\n  }\n\n  return (\n    <Select value={current} onValueChange={onChange} disabled={isPending}>\n      <SelectTrigger className=\"w-[200px]\" aria-label=\"Branch\">\n        <SelectValue placeholder=\"Select branch\" />\n      </SelectTrigger>\n      <SelectContent>\n        {allowAll && <SelectItem value={ALL_BRANCHES}>All branches</SelectItem>}\n        {branches.map((b) => (\n          <SelectItem key={b.id} value={b.id}>\n            {b.name}\n          </SelectItem>\n        ))}\n      </SelectContent>\n    </Select>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/branch-switcher.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

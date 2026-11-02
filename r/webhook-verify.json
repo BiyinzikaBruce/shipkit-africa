@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "webhook-verify",
+  "title": "Webhook verify",
+  "description": "Constant-time HMAC and shared-secret verification for payment webhooks (Paystack, Flutterwave, …).",
+  "dependencies": [
+    "server-only"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/shipkit/webhook-verify.ts",
+      "content": "/**\n * ShipKit · webhook-verify\n * Verify webhook signatures safely (constant-time) before trusting a payload.\n * Always pass the RAW request body (`await req.text()`), not re-serialised JSON.\n *\n *   // Paystack: HMAC SHA512 of the raw body in `x-paystack-signature` (hex)\n *   const ok = verifyHmac(raw, req.headers.get(\"x-paystack-signature\"), env.PAYSTACK_SECRET_KEY, \"sha512\");\n *\n *   // Providers that send a shared secret header instead of a signature:\n *   const ok = safeEqual(req.headers.get(\"verif-hash\"), env.FLW_WEBHOOK_HASH);\n *\n * Always confirm the provider's current signing method in its docs.\n */\nimport \"server-only\";\nimport { createHmac, timingSafeEqual } from \"node:crypto\";\n\n/** Constant-time string comparison. False if either value is missing. */\nexport function safeEqual(a: string | null | undefined, b: string | null | undefined): boolean {\n  if (!a || !b) return false;\n  const ab = Buffer.from(a);\n  const bb = Buffer.from(b);\n  if (ab.length !== bb.length) return false;\n  return timingSafeEqual(ab, bb);\n}\n\n/** Compute an HMAC of the raw body. */\nexport function hmac(rawBody: string, secret: string, algorithm: \"sha256\" | \"sha512\" = \"sha256\", encoding: \"hex\" | \"base64\" = \"hex\"): string {\n  return createHmac(algorithm, secret).update(rawBody, \"utf8\").digest(encoding);\n}\n\n/** True if `signature` equals the HMAC of `rawBody` with `secret`. Fails closed on missing input. */\nexport function verifyHmac(\n  rawBody: string,\n  signature: string | null | undefined,\n  secret: string | undefined,\n  algorithm: \"sha256\" | \"sha512\" = \"sha256\",\n  encoding: \"hex\" | \"base64\" = \"hex\",\n): boolean {\n  if (!secret || !signature) return false;\n  return safeEqual(signature, hmac(rawBody, secret, algorithm, encoding));\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/webhook-verify.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

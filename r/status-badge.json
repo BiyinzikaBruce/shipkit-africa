@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "status-badge",
+  "title": "Status badge",
+  "description": "Consistent, accessible badges for payment, order and sync statuses.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/components/shipkit/status-badge.tsx",
+      "content": "/**\n * ShipKit · status-badge\n * Consistent colours for payment / order / sync statuses. Always shows text,\n * never colour alone.\n *\n *   <StatusBadge status=\"PENDING\" />\n *   <StatusBadge status=\"SUCCESSFUL\" label=\"Paid\" />\n */\nimport { cn } from \"@/lib/utils\";\n\nconst TONES = {\n  success: \"bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-500/10 dark:text-green-400\",\n  warning: \"bg-amber-50 text-amber-800 ring-amber-600/20 dark:bg-amber-500/10 dark:text-amber-400\",\n  danger: \"bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-500/10 dark:text-red-400\",\n  neutral: \"bg-zinc-100 text-zinc-700 ring-zinc-500/20 dark:bg-zinc-500/10 dark:text-zinc-300\",\n  info: \"bg-sky-50 text-sky-700 ring-sky-600/20 dark:bg-sky-500/10 dark:text-sky-400\",\n} as const;\n\nexport type StatusTone = keyof typeof TONES;\n\n/** Default mapping. Extend it for your own statuses. */\nexport const STATUS_TONES: Record<string, StatusTone> = {\n  SUCCESSFUL: \"success\", PAID: \"success\", COMPLETED: \"success\", ACTIVE: \"success\", SYNCED: \"success\",\n  PENDING: \"warning\", PROCESSING: \"warning\", PARTIAL: \"warning\", QUEUED: \"warning\",\n  FAILED: \"danger\", CANCELLED: \"danger\", VOIDED: \"danger\", EXPIRED: \"danger\", OVERDUE: \"danger\",\n  DRAFT: \"neutral\", INACTIVE: \"neutral\",\n  REFUNDED: \"info\",\n};\n\nfunction humanise(status: string) {\n  return status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, \" \");\n}\n\nexport function StatusBadge({\n  status,\n  label,\n  tone,\n  className,\n}: {\n  status: string;\n  label?: string;\n  tone?: StatusTone;\n  className?: string;\n}) {\n  const t = tone ?? STATUS_TONES[status.toUpperCase()] ?? \"neutral\";\n  return (\n    <span\n      className={cn(\n        \"inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset\",\n        TONES[t],\n        className,\n      )}\n    >\n      <span aria-hidden className=\"size-1.5 rounded-full bg-current\" />\n      {label ?? humanise(status)}\n    </span>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/status-badge.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "kpi-card",
+  "title": "KPI card",
+  "description": "Dashboard number card with short money format, full value on hover, and % change.",
+  "registryDependencies": [
+    "card",
+    "utils",
+    "https://biyinzikabruce.github.io/shipkit-africa/r/money.json"
+  ],
+  "files": [
+    {
+      "path": "registry/components/shipkit/kpi-card.tsx",
+      "content": "/**\n * ShipKit · kpi-card\n * Dashboard number card. Money is formatted with ShipKit money helpers,\n * showing the short form with the full value on hover.\n *\n *   <KpiCard label=\"Sales today\" amount={1250000} currency=\"UGX\" change={12.5} />\n *   <KpiCard label=\"Items sold\" value={342} />\n */\nimport type { ReactNode } from \"react\";\nimport { Card, CardContent } from \"@/components/ui/card\";\nimport { cn } from \"@/lib/utils\";\nimport { formatMoney, formatMoneyShort, type MoneyInput } from \"@/lib/shipkit/money\";\n\ninterface Props {\n  label: string;\n  /** Money value (formatted with currency). */\n  amount?: MoneyInput;\n  currency?: string;\n  /** Plain number value (counts). */\n  value?: number;\n  /** % change vs previous period. */\n  change?: number;\n  hint?: string;\n  icon?: ReactNode;\n  className?: string;\n}\n\nexport function KpiCard({ label, amount, currency = \"UGX\", value, change, hint, icon, className }: Props) {\n  const isMoney = amount !== undefined;\n  const display = isMoney ? formatMoneyShort(amount, currency) : new Intl.NumberFormat().format(value ?? 0);\n  const full = isMoney ? formatMoney(amount, currency) : undefined;\n\n  return (\n    <Card className={cn(\"gap-0\", className)}>\n      <CardContent className=\"space-y-2 p-5\">\n        <div className=\"flex items-center justify-between text-sm text-muted-foreground\">\n          <span>{label}</span>\n          {icon}\n        </div>\n        <div className=\"text-3xl font-bold tabular-nums tracking-tight\" title={full}>\n          {display}\n        </div>\n        {(change !== undefined || hint) && (\n          <div className=\"flex items-center gap-2 text-xs\">\n            {change !== undefined && (\n              <span className={cn(\"font-medium\", change >= 0 ? \"text-green-600\" : \"text-red-600\")}>\n                {change >= 0 ? \"▲\" : \"▼\"} {Math.abs(change).toFixed(1)}%\n              </span>\n            )}\n            {hint && <span className=\"text-muted-foreground\">{hint}</span>}\n          </div>\n        )}\n      </CardContent>\n    </Card>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/kpi-card.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

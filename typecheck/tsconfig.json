@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/lib/shipkit/*": [
+        "../registry/lib/shipkit/*"
+      ],
+      "@/components/shipkit/*": [
+        "../registry/components/shipkit/*"
+      ],
+      "@/lib/*": [
+        "./shims/lib/*"
+      ],
+      "@/components/ui/*": [
+        "./shims/ui/*"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react/*": [
+        "./node_modules/@types/react/*"
+      ],
+      "react-dom": [
+        "./node_modules/@types/react-dom"
+      ],
+      "*": [
+        "./node_modules/*",
+        "./node_modules/@types/*"
+      ]
+    },
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "react",
+      "react-dom"
+    ]
+  },
+  "include": [
+    "../registry/**/*.ts",
+    "../registry/**/*.tsx",
+    "shims/**/*.ts",
+    "shims/**/*.tsx"
+  ]
+}

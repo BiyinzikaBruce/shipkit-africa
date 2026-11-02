@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "role-gate",
+  "title": "Role gate",
+  "description": "Show UI only to some roles. UI convenience; pair with require-role on the server.",
+  "files": [
+    {
+      "path": "registry/components/shipkit/role-gate.tsx",
+      "content": "\"use client\";\n/**\n * ShipKit · role-gate\n * Show children only to some roles. UI convenience ONLY: the server must\n * still check with `requireRole`.\n *\n *   <RoleGate allow={[\"OWNER\", \"MANAGER\"]}>\n *     <Button variant=\"destructive\">Void sale</Button>\n *   </RoleGate>\n */\nimport type { ReactNode } from \"react\";\nimport { authClient } from \"@/lib/auth-client\";\n\nexport function useRole(): { role: string | null; isPending: boolean } {\n  const { data, isPending } = authClient.useSession();\n  const role = (data?.user as { role?: string | null } | undefined)?.role ?? null;\n  return { role, isPending };\n}\n\nexport function RoleGate({\n  allow,\n  children,\n  fallback = null,\n}: {\n  allow: readonly string[];\n  children: ReactNode;\n  fallback?: ReactNode;\n}) {\n  const { role, isPending } = useRole();\n  if (isPending) return null;\n  return role && allow.includes(role) ? <>{children}</> : <>{fallback}</>;\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/role-gate.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scoped-query",
+  "title": "Scoped query",
+  "description": "Merge organisation and branch scope from the session into every Prisma where/data. Fails closed.",
+  "files": [
+    {
+      "path": "registry/lib/shipkit/scoped-query.ts",
+      "content": "/**\n * ShipKit · scoped-query\n * Never forget the tenant filter. Merge organisation (and branch) scope into\n * every Prisma `where`, taken from the server-verified session.\n *\n *   prisma.sale.findMany({ where: scopeWhere(session, { status: \"COMPLETED\" }) })\n *   prisma.sale.findFirst({ where: scopeWhere(session, { id }, { branch: true }) })\n *   prisma.sale.create({ data: scopeData(session, { total, ... }) })\n */\n\nexport interface ScopedSession {\n  user: { role?: string | null; organisationId?: string | null; branchId?: string | null };\n}\n\nexport interface ScopeOptions {\n  /** Also filter by the user's branch. Default false. */\n  branch?: boolean;\n  /** Roles that see every branch even when `branch: true`. Default [\"OWNER\"]. */\n  allBranchRoles?: string[];\n}\n\nfunction organisationOf(session: ScopedSession): string {\n  const id = session.user.organisationId;\n  if (!id) throw new Error(\"Session has no organisation: refusing an unscoped query\");\n  return id;\n}\n\nfunction branchFilter(session: ScopedSession, opts: ScopeOptions): { branchId?: string } {\n  if (!opts.branch) return {};\n  const allBranchRoles = opts.allBranchRoles ?? [\"OWNER\"];\n  if (session.user.role && allBranchRoles.includes(session.user.role)) return {};\n  const branchId = session.user.branchId;\n  if (!branchId) throw new Error(\"Session has no branch: refusing a branch-scoped query\");\n  return { branchId };\n}\n\n/** Add organisation (and optional branch) scope to a `where`. Scope wins over caller values. */\nexport function scopeWhere<W extends object>(session: ScopedSession, where: W = {} as W, opts: ScopeOptions = {}) {\n  return { ...where, organisationId: organisationOf(session), ...branchFilter(session, opts) };\n}\n\n/** Add organisation (and optional branch) to `data` on create. Scope wins over caller values. */\nexport function scopeData<D extends object>(session: ScopedSession, data: D, opts: ScopeOptions = {}) {\n  return { ...data, organisationId: organisationOf(session), ...branchFilter(session, opts) };\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/scoped-query.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

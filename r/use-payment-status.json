@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "use-payment-status",
+  "title": "Use payment status",
+  "description": "Poll your payment status endpoint while a mobile-money prompt is pending. Pauses when hidden, stops on final status or timeout.",
+  "files": [
+    {
+      "path": "registry/components/shipkit/use-payment-status.ts",
+      "content": "\"use client\";\n/**\n * ShipKit · use-payment-status\n * Poll your own status endpoint while a mobile-money prompt is pending.\n * Stops on a final status, on timeout, and pauses while the tab is hidden.\n *\n *   const { status, timedOut } = usePaymentStatus(`/api/payments/${id}/status`, { enabled: !!id });\n *\n * Your endpoint returns { status: \"PENDING\" | \"SUCCESSFUL\" | \"FAILED\" | … } after\n * checking the provider SERVER-side (e.g. ShipKit `getRequestToPayStatus`).\n */\nimport { useEffect, useRef, useState } from \"react\";\n\nconst FINAL = new Set([\"SUCCESSFUL\", \"FAILED\", \"CANCELLED\", \"EXPIRED\"]);\n\nexport function usePaymentStatus(\n  url: string,\n  { enabled = true, intervalMs = 5000, timeoutMs = 120_000 }: { enabled?: boolean; intervalMs?: number; timeoutMs?: number } = {},\n) {\n  const [status, setStatus] = useState<string>(\"PENDING\");\n  const [error, setError] = useState<string | null>(null);\n  const [timedOut, setTimedOut] = useState(false);\n  const startedAt = useRef<number>(0);\n\n  useEffect(() => {\n    if (!enabled) return;\n    let cancelled = false;\n    let timer: ReturnType<typeof setTimeout> | undefined;\n    const controller = new AbortController();\n    startedAt.current = Date.now();\n    setStatus(\"PENDING\");\n    setError(null);\n    setTimedOut(false);\n\n    async function tick() {\n      if (cancelled) return;\n      if (Date.now() - startedAt.current > timeoutMs) {\n        setTimedOut(true);\n        return;\n      }\n      if (document.visibilityState === \"visible\") {\n        try {\n          const res = await fetch(url, { cache: \"no-store\", signal: controller.signal });\n          if (!res.ok) throw new Error(`Status check failed (${res.status})`);\n          const data = (await res.json()) as { status?: string };\n          if (cancelled) return;\n          const s = (data.status ?? \"PENDING\").toUpperCase();\n          setStatus(s);\n          setError(null);\n          if (FINAL.has(s)) return;\n        } catch (e) {\n          if (cancelled || (e instanceof DOMException && e.name === \"AbortError\")) return;\n          setError(e instanceof Error ? e.message : \"Status check failed\");\n        }\n      }\n      timer = setTimeout(tick, intervalMs);\n    }\n\n    tick();\n    return () => {\n      cancelled = true;\n      controller.abort();\n      if (timer) clearTimeout(timer);\n    };\n  }, [url, enabled, intervalMs, timeoutMs]);\n\n  return { status, error, timedOut, isFinal: FINAL.has(status) };\n}\n",
+      "type": "registry:hook",
+      "target": "components/shipkit/use-payment-status.ts"
+    }
+  ],
+  "type": "registry:hook"
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "offline-banner",
+  "title": "Offline banner",
+  "description": "useOnline() hook plus a banner showing offline status and pending sync count.",
+  "files": [
+    {
+      "path": "registry/components/shipkit/offline-banner.tsx",
+      "content": "\"use client\";\n/**\n * ShipKit · offline-banner\n * Tell users when they're offline and how many changes are waiting to sync.\n *\n *   const online = useOnline();\n *   <OfflineBanner pending={outbox.length} />\n */\nimport { useSyncExternalStore } from \"react\";\n\nfunction subscribe(callback: () => void) {\n  window.addEventListener(\"online\", callback);\n  window.addEventListener(\"offline\", callback);\n  return () => {\n    window.removeEventListener(\"online\", callback);\n    window.removeEventListener(\"offline\", callback);\n  };\n}\n\n/** True when the browser reports a network connection. Server render assumes online. */\nexport function useOnline(): boolean {\n  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);\n}\n\nexport function OfflineBanner({ pending = 0 }: { pending?: number }) {\n  const online = useOnline();\n  if (online && pending === 0) return null;\n  return (\n    <div\n      role=\"status\"\n      aria-live=\"polite\"\n      className={\n        online\n          ? \"bg-sky-50 px-4 py-2 text-center text-sm text-sky-800\"\n          : \"bg-amber-50 px-4 py-2 text-center text-sm text-amber-900\"\n      }\n    >\n      {online\n        ? `Syncing ${pending} change${pending === 1 ? \"\" : \"s\"}…`\n        : `You're offline. ${pending > 0 ? `${pending} change${pending === 1 ? \"\" : \"s\"} will sync` : \"Changes will sync\"} when you reconnect.`}\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/offline-banner.tsx"
+    }
+  ],
+  "type": "registry:component"
+}

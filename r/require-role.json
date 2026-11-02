@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "require-role",
+  "title": "Require role",
+  "description": "Server-side session and role gate for pages, layouts, server actions and route handlers (Better Auth).",
+  "dependencies": [
+    "server-only"
+  ],
+  "files": [
+    {
+      "path": "registry/lib/shipkit/require-role.ts",
+      "content": "/**\n * ShipKit · require-role\n * Server-side gate for pages, layouts, server actions and route handlers.\n * Pair with <RoleGate> in the UI: the gate hides, this blocks.\n *\n *   // layout or page: redirects when not allowed\n *   const session = await requireRole([\"OWNER\", \"MANAGER\"]);\n *\n *   // server action: throws (never redirects mid-action)\n *   const session = await requireRole([\"OWNER\"], { onDenied: \"throw\" });\n *\n * Requires `lib/auth.ts` exporting a Better Auth instance (`auth`) whose user has a `role` field.\n */\nimport \"server-only\";\nimport { headers } from \"next/headers\";\nimport { redirect } from \"next/navigation\";\nimport { auth } from \"@/lib/auth\";\n\nexport type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>;\n\nexport class AuthError extends Error {\n  status: 401 | 403;\n  constructor(status: 401 | 403, message: string) {\n    super(message);\n    this.status = status;\n    this.name = \"AuthError\";\n  }\n}\n\ninterface Options {\n  /** \"redirect\" (pages/layouts, default) or \"throw\" (actions/route handlers). */\n  onDenied?: \"redirect\" | \"throw\";\n  loginPath?: string;\n  /** Where to send a logged-in user without access. Default \"/\". */\n  deniedPath?: string;\n}\n\n/** Returns the session or sends the user to login. */\nexport async function requireSession(opts: Options = {}): Promise<Session> {\n  const session = await auth.api.getSession({ headers: await headers() });\n  if (!session) {\n    if (opts.onDenied === \"throw\") throw new AuthError(401, \"Not signed in\");\n    redirect(opts.loginPath ?? \"/login\");\n  }\n  return session;\n}\n\n/** Returns the session if the user's role is in `roles`; otherwise redirects or throws 403. */\nexport async function requireRole(roles: readonly string[], opts: Options = {}): Promise<Session> {\n  const session = await requireSession(opts);\n  const role = (session.user as { role?: string | null }).role;\n  if (!role || !roles.includes(role)) {\n    if (opts.onDenied === \"throw\") throw new AuthError(403, \"Forbidden\");\n    redirect(opts.deniedPath ?? \"/\");\n  }\n  return session;\n}\n\n/** Turn an AuthError into an HTTP response in route handlers. */\nexport function authErrorResponse(error: unknown): Response | null {\n  if (error instanceof AuthError) return Response.json({ error: error.message }, { status: error.status });\n  return null;\n}\n",
+      "type": "registry:lib",
+      "target": "lib/shipkit/require-role.ts"
+    }
+  ],
+  "type": "registry:lib"
+}

@@ -1,0 +1,276 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "shipkit-africa",
+  "homepage": "https://biyinzikabruce.github.io/shipkit-africa/",
+  "items": [
+    {
+      "name": "money",
+      "type": "registry:lib",
+      "title": "Money",
+      "description": "Format, shorten and parse money for UGX, KES, TZS, RWF, USD and more. Display-only, so do maths with Decimal.",
+      "files": [
+        {
+          "path": "registry/lib/shipkit/money.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/money.ts"
+        }
+      ]
+    },
+    {
+      "name": "phone",
+      "type": "registry:lib",
+      "title": "Phone",
+      "description": "Normalise East African mobile numbers to E.164 (SMS) or MSISDN (MoMo), validate, format locally, and detect network with your own prefix map.",
+      "files": [
+        {
+          "path": "registry/lib/shipkit/phone.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/phone.ts"
+        }
+      ]
+    },
+    {
+      "name": "scoped-query",
+      "type": "registry:lib",
+      "title": "Scoped query",
+      "description": "Merge organisation and branch scope from the session into every Prisma where/data. Fails closed.",
+      "files": [
+        {
+          "path": "registry/lib/shipkit/scoped-query.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/scoped-query.ts"
+        }
+      ]
+    },
+    {
+      "name": "require-role",
+      "type": "registry:lib",
+      "title": "Require role",
+      "description": "Server-side session and role gate for pages, layouts, server actions and route handlers (Better Auth).",
+      "dependencies": [
+        "server-only"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/require-role.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/require-role.ts"
+        }
+      ]
+    },
+    {
+      "name": "audit-log",
+      "type": "registry:lib",
+      "title": "Audit log",
+      "description": "Write who-did-what audit entries with before/after snapshots, secrets redacted. Includes the Prisma model.",
+      "dependencies": [
+        "server-only"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/audit-log.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/audit-log.ts"
+        }
+      ]
+    },
+    {
+      "name": "webhook-verify",
+      "type": "registry:lib",
+      "title": "Webhook verify",
+      "description": "Constant-time HMAC and shared-secret verification for payment webhooks (Paystack, Flutterwave, \u2026).",
+      "dependencies": [
+        "server-only"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/webhook-verify.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/webhook-verify.ts"
+        }
+      ]
+    },
+    {
+      "name": "momo",
+      "type": "registry:lib",
+      "title": "MTN MoMo collections",
+      "description": "Dependency-free MTN MoMo Collections client: access token, request-to-pay, and status lookup.",
+      "dependencies": [
+        "server-only"
+      ],
+      "registryDependencies": [
+        "https://biyinzikabruce.github.io/shipkit-africa/r/phone.json"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/momo.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/momo.ts"
+        }
+      ]
+    },
+    {
+      "name": "sms",
+      "type": "registry:lib",
+      "title": "SMS (Africa's Talking)",
+      "description": "Send SMS through Africa's Talking's REST API with phone normalisation and a segment-length helper.",
+      "dependencies": [
+        "server-only"
+      ],
+      "registryDependencies": [
+        "https://biyinzikabruce.github.io/shipkit-africa/r/phone.json"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/sms.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/sms.ts"
+        }
+      ]
+    },
+    {
+      "name": "rate-limit",
+      "type": "registry:lib",
+      "title": "Rate limit",
+      "description": "Upstash rate-limit presets for login, OTP, password reset, payments and APIs.",
+      "dependencies": [
+        "server-only",
+        "@upstash/ratelimit",
+        "@upstash/redis"
+      ],
+      "files": [
+        {
+          "path": "registry/lib/shipkit/rate-limit.ts",
+          "type": "registry:lib",
+          "target": "lib/shipkit/rate-limit.ts"
+        }
+      ]
+    },
+    {
+      "name": "role-gate",
+      "type": "registry:component",
+      "title": "Role gate",
+      "description": "Show UI only to some roles. UI convenience; pair with require-role on the server.",
+      "files": [
+        {
+          "path": "registry/components/shipkit/role-gate.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/role-gate.tsx"
+        }
+      ]
+    },
+    {
+      "name": "status-badge",
+      "type": "registry:component",
+      "title": "Status badge",
+      "description": "Consistent, accessible badges for payment, order and sync statuses.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/components/shipkit/status-badge.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/status-badge.tsx"
+        }
+      ]
+    },
+    {
+      "name": "kpi-card",
+      "type": "registry:component",
+      "title": "KPI card",
+      "description": "Dashboard number card with short money format, full value on hover, and % change.",
+      "registryDependencies": [
+        "card",
+        "utils",
+        "https://biyinzikabruce.github.io/shipkit-africa/r/money.json"
+      ],
+      "files": [
+        {
+          "path": "registry/components/shipkit/kpi-card.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/kpi-card.tsx"
+        }
+      ]
+    },
+    {
+      "name": "empty-state",
+      "type": "registry:component",
+      "title": "Empty state",
+      "description": "Icon, one sentence and the main action for empty lists.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/components/shipkit/empty-state.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/empty-state.tsx"
+        }
+      ]
+    },
+    {
+      "name": "offline-banner",
+      "type": "registry:component",
+      "title": "Offline banner",
+      "description": "useOnline() hook plus a banner showing offline status and pending sync count.",
+      "files": [
+        {
+          "path": "registry/components/shipkit/offline-banner.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/offline-banner.tsx"
+        }
+      ]
+    },
+    {
+      "name": "branch-switcher",
+      "type": "registry:component",
+      "title": "Branch switcher",
+      "description": "Switch the branch a page shows via ?branch=, with an optional All branches item.",
+      "registryDependencies": [
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/components/shipkit/branch-switcher.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/branch-switcher.tsx"
+        }
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data table",
+      "description": "Server-paginated TanStack table with URL-based page and debounced search.",
+      "dependencies": [
+        "@tanstack/react-table"
+      ],
+      "registryDependencies": [
+        "table",
+        "button",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "registry/components/shipkit/data-table.tsx",
+          "type": "registry:component",
+          "target": "components/shipkit/data-table.tsx"
+        }
+      ]
+    },
+    {
+      "name": "use-payment-status",
+      "type": "registry:hook",
+      "title": "Use payment status",
+      "description": "Poll your payment status endpoint while a mobile-money prompt is pending. Pauses when hidden, stops on final status or timeout.",
+      "files": [
+        {
+          "path": "registry/components/shipkit/use-payment-status.ts",
+          "type": "registry:hook",
+          "target": "components/shipkit/use-payment-status.ts"
+        }
+      ]
+    }
+  ]
+}

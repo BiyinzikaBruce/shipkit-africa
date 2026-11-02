@@ -1,0 +1,18 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "empty-state",
+  "title": "Empty state",
+  "description": "Icon, one sentence and the main action for empty lists.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/components/shipkit/empty-state.tsx",
+      "content": "/**\n * ShipKit · empty-state\n * What a list shows when it has nothing yet: icon, one sentence, the main action.\n *\n *   <EmptyState icon={<Receipt />} title=\"No sales yet today\" action={<Button>New sale</Button>} />\n */\nimport type { ReactNode } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport function EmptyState({\n  icon,\n  title,\n  description,\n  action,\n  className,\n}: {\n  icon?: ReactNode;\n  title: string;\n  description?: string;\n  action?: ReactNode;\n  className?: string;\n}) {\n  return (\n    <div className={cn(\"flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-10 text-center\", className)}>\n      {icon && <div className=\"text-muted-foreground [&_svg]:size-10\">{icon}</div>}\n      <div className=\"space-y-1\">\n        <p className=\"font-medium\">{title}</p>\n        {description && <p className=\"max-w-sm text-sm text-muted-foreground\">{description}</p>}\n      </div>\n      {action}\n    </div>\n  );\n}\n",
+      "type": "registry:component",
+      "target": "components/shipkit/empty-state.tsx"
+    }
+  ],
+  "type": "registry:component"
+}
